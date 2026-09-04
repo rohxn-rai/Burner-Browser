@@ -1,0 +1,12 @@
+appId: com.example.tempbrowser
+productName: Temporary Browser Manager
+copyright: Copyright © 2026 Rohan Rai
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+publish: null

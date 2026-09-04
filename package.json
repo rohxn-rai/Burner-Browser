@@ -1,0 +1,40 @@
+{
+  "private": true,
+  "name": "burner-browser",
+  "productName": "Burner Browser",
+  "description": "Application for creating and managing multiple browser sessions",
+  "version": "1.0.0",
+  "author": "Rohan Rai",
+  "type": "module",
+  "main": "app/main.js",
+  "scripts": {
+    "dev": "nextron",
+    "build": "nextron build",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@puppeteer/browsers": "^3.2.1",
+    "@types/adm-zip": "^0.5.8",
+    "adm-zip": "^0.6.0",
+    "electron-serve": "^3.0.0",
+    "electron-store": "^11.0.2",
+    "lucide-react": "^1.33.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.14",
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3",
+    "next": "^16.3.0",
+    "nextron": "^10.2.0",
+    "postcss": "^8.5.26",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "electron-winstaller@5.4.0": true
+  }
+}

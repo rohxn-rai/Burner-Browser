@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* ─── AMOLED Dark Theme — Design Tokens ─────────────────────────────────── */
+@theme {
+  --color-base: #000000;
+  --color-surface: #0d0d0d;
+  --color-elevated: #141414;
+  --color-overlay: #1a1a1a;
+  --color-hover: #1f1f1f;
+
+  --color-border: #2a2a2a;
+  --color-border-subtle: #1f1f1f;
+
+  --color-primary: #f0f0f0;
+  --color-secondary: #888888;
+  --color-tertiary: #4d4d4d;
+
+  --color-accent: #4f8cff;
+  --color-accent-hover: #3e7ae8;
+  --color-accent-muted: rgba(79, 140, 255, 0.12);
+  --color-accent-border: rgba(79, 140, 255, 0.35);
+
+  --color-warn: #f2b84b;
+  --color-warn-muted: rgba(242, 184, 75, 0.12);
+  --color-warn-border: rgba(242, 184, 75, 0.35);
+
+  --color-danger: #ef6461;
+  --color-danger-hover: #d95350;
+  --color-danger-muted: rgba(239, 100, 97, 0.12);
+  --color-danger-border: rgba(239, 100, 97, 0.35);
+
+  --color-success: #3ddc84;
+  --color-success-muted: rgba(61, 220, 132, 0.15);
+  --color-success-border: rgba(61, 220, 132, 0.35);
+
+  --color-tag-webstore: #a78bfa;
+  --color-tag-webstore-muted: rgba(167, 139, 250, 0.12);
+  --color-tag-webstore-border: rgba(167, 139, 250, 0.3);
+  --color-tag-local: #fb923c;
+  --color-tag-local-muted: rgba(251, 146, 60, 0.12);
+  --color-tag-local-border: rgba(251, 146, 60, 0.3);
+}
+
+/* ─── Base Styles ────────────────────────────────────────────────────────── */
+@layer base {
+  body {
+    @apply bg-base text-primary;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Hide native scrollbars app-wide (scroll still works) */
+  * {
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ─── Title Bar Drag Region ──────────────────────────────────────────────── */
+@layer utilities {
+  .app-drag {
+    -webkit-app-region: drag;
+    app-region: drag;
+  }
+
+  .app-no-drag {
+    -webkit-app-region: no-drag;
+    app-region: no-drag;
+  }
+}
+
+/* ─── Reusable Component Classes ─────────────────────────────────────────── */
+@layer components {
+  /* Inputs */
+  .input {
+    @apply w-full p-3 rounded-lg text-sm transition-colors box-border bg-overlay border border-border text-primary placeholder:text-tertiary focus:outline-none focus:border-accent;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply px-5 py-2 rounded-lg text-sm font-medium transition-colors bg-accent text-white hover:bg-accent-hover disabled:opacity-45 disabled:cursor-not-allowed;
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply px-5 py-2 rounded-lg text-sm font-medium transition-colors text-secondary hover:text-primary hover:bg-hover;
+  }
+
+  /* Card */
+  .card {
+    @apply rounded-xl p-5 bg-surface border border-border;
+  }
+
+  /* Modal backdrop */
+  .modal-backdrop {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs;
+  }
+
+  /* Modal panel */
+  .modal-panel {
+    @apply rounded-xl shadow-2xl w-full max-w-md overflow-hidden bg-elevated border border-border;
+  }
+}
