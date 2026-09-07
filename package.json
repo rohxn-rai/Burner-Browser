@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "burner-browser",
-  "productName": "Burner Browser",
+  "name": "temporary-browser-manager",
+  "productName": "Temporary Browser Manager",
   "description": "Application for creating and managing multiple browser sessions",
   "version": "1.0.0",
   "author": "Rohan Rai",

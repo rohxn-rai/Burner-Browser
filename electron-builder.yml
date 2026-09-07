@@ -10,3 +10,28 @@ files:
       - package.json
       - app
 publish: null
+
+mac:
+  category: public.app-category.utilities
+  target:
+    - target: dmg
+      arch:
+        - x64 # Intel Macs
+        - arm64 # Apple Silicon
+  icon: resources/icon.icns
+
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
