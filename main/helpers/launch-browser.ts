@@ -382,4 +382,28 @@ const registerLaunchHandlers = () => {
   });
 };
 
+/**
+ * Synchronously terminates every active browser session and removes its
+ * profile directory. Called by main.ts during the before-quit flow so that
+ * no orphaned Chromium processes or temp profiles are left behind.
+ */
+export function killAllSessions(): void {
+  for (const [id, session] of sessions.entries()) {
+    try {
+      session.process.kill();
+    } catch {}
+
+    sessions.delete(id);
+
+    try {
+      fs.rmSync(session.profileDir, { recursive: true, force: true });
+    } catch {}
+  }
+}
+
+/** Returns the number of currently tracked (running) sessions. */
+export function getSessionCount(): number {
+  return sessions.size;
+}
+
 export default registerLaunchHandlers;

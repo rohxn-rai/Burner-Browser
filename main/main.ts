@@ -3,7 +3,10 @@ import serve from "electron-serve";
 import path from "path";
 import { createWindow } from "./helpers/create-window";
 import registerBrowserHandlers from "./helpers/register-browser";
-import registerLaunchHandlers from "./helpers/launch-browser";
+import registerLaunchHandlers, {
+  killAllSessions,
+  getSessionCount,
+} from "./helpers/launch-browser";
 import registerSettingsHandlers from "./helpers/settings";
 
 const isProd = process.env.NODE_ENV === "production";
@@ -76,6 +79,10 @@ let isQuitting = false;
     {
       label: "Quit",
       click: () => {
+        // Kill any running browser sessions before letting the app exit
+        if (getSessionCount() > 0) {
+          killAllSessions();
+        }
         app.quit();
       },
     },
@@ -114,9 +121,13 @@ app.on("window-all-closed", () => {
   // Do nothing — keep running in the background
 });
 
-// Mark the app as intentionally quitting so the close handler allows it
+// Safety-net: for any quit path not caught by the tray handler (e.g. OS shutdown,
+// app.quit() called from elsewhere), kill remaining sessions before the process exits.
 app.on("before-quit", () => {
   isQuitting = true;
+  if (getSessionCount() > 0) {
+    killAllSessions();
+  }
 });
 
 ipcMain.on("message", async (event, arg) => {
