@@ -4,10 +4,12 @@ interface ActiveWindow {
   id: string;
   pid: number;
   startUrl: string;
+  name: string;
 }
 
 export function BrowserTab() {
   const [startUrl, setStartUrl] = useState("");
+  const [sessionName, setSessionName] = useState("");
   const [activeWindows, setActiveWindows] = useState<ActiveWindow[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,8 @@ export function BrowserTab() {
         if (settings?.startUrl) {
           setStartUrl(settings.startUrl);
         }
-        setActiveWindows(windows);
+        // Active windows from main don't carry a name — backfill with the URL
+        setActiveWindows(windows.map((w) => ({ ...w, name: w.startUrl })));
       } catch (err) {
         console.error("Failed to load initial browser tab data:", err);
       }
@@ -39,9 +42,18 @@ export function BrowserTab() {
     // 3. Constant background polling check every 2 seconds
     const syncActiveWindows = async () => {
       try {
-        const windows: ActiveWindow[] =
-          await window.browserManager.getActiveBrowserWindows();
-        setActiveWindows(windows);
+        const windows = await window.browserManager.getActiveBrowserWindows();
+        // Merge: preserve any names we already have, only add genuinely new entries
+        setActiveWindows((prev) => {
+          const existingIds = new Set(prev.map((w) => w.id));
+          const newEntries = windows
+            .filter((w) => !existingIds.has(w.id))
+            .map((w) => ({ ...w, name: w.startUrl }));
+          // Remove sessions that are no longer reported
+          const activeIds = new Set(windows.map((w) => w.id));
+          const retained = prev.filter((w) => activeIds.has(w.id));
+          return [...retained, ...newEntries];
+        });
       } catch {}
     };
     const interval = setInterval(syncActiveWindows, 2000);
@@ -68,14 +80,21 @@ export function BrowserTab() {
         extensions,
       });
 
+      const resolvedUrl = startUrl || "chrome://newtab";
+      const resolvedName = sessionName.trim() || resolvedUrl;
+
       setActiveWindows((prev) => [
         ...prev,
         {
           id: result.id,
           pid: result.pid,
-          startUrl: startUrl || "chrome://newtab",
+          startUrl: resolvedUrl,
+          name: resolvedName,
         },
       ]);
+
+      // Clear the name field after launch so the next session gets a fresh label
+      setSessionName("");
     } catch (err: any) {
       setError(err?.message ?? "Failed to launch browser window.");
     } finally {
@@ -112,27 +131,44 @@ export function BrowserTab() {
           Launch Isolated Browser
         </h2>
 
-        <div className="mb-6">
-          <label className="block mb-2 text-sm font-medium text-secondary">
-            Start URL
-          </label>
-          <input
-            type="text"
-            value={startUrl}
-            placeholder="https://example.com"
-            onChange={(e) => {
-              const val = e.target.value;
-              setStartUrl(val);
-              window.browserManager.saveGeneralSettings({ startUrl: val });
-            }}
-            className="input"
-          />
-          <p className="mt-2 text-xs text-tertiary">
-            Each launch creates a fully isolated profile with its own cookies,
-            session, and storage. Bookmarks and extensions are applied
-            automatically. Web Store extensions are downloaded and cached on
-            first launch.
-          </p>
+        <div className="flex flex-col gap-4 mb-6">
+          {/* Instance name */}
+          <div>
+            <label className="block mb-2 text-sm font-medium text-secondary">
+              Session Name
+            </label>
+            <input
+              type="text"
+              value={sessionName}
+              placeholder="Name your session..."
+              onChange={(e) => setSessionName(e.target.value)}
+              className="input"
+            />
+          </div>
+
+          {/* Start URL */}
+          <div>
+            <label className="block mb-2 text-sm font-medium text-secondary">
+              Start URL
+            </label>
+            <input
+              type="text"
+              value={startUrl}
+              placeholder="https://example.com"
+              onChange={(e) => {
+                const val = e.target.value;
+                setStartUrl(val);
+                window.browserManager.saveGeneralSettings({ startUrl: val });
+              }}
+              className="input"
+            />
+            <p className="mt-2 text-xs text-tertiary">
+              Each launch creates a fully isolated profile with its own cookies,
+              session, and storage. Bookmarks and extensions are applied
+              automatically. Web Store extensions are downloaded and cached on
+              first launch.
+            </p>
+          </div>
         </div>
 
         {error && (
@@ -158,7 +194,7 @@ export function BrowserTab() {
           <button
             onClick={handleKillAll}
             disabled={activeWindows.length < 1}
-            className="flex items-center gap-1.5 px-5 py-2 rounded-md text-xs font-medium transition-colors bg-danger text-white hover:bg-danger-hover cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition-colors bg-danger text-white hover:bg-danger-hover cursor-pointer disabled:bg-danger-muted disabled:text-white/25"
           >
             Kill All Process
           </button>
@@ -178,14 +214,17 @@ export function BrowserTab() {
                     Active
                   </span>
                   <span
-                    className="text-sm truncate text-primary"
-                    title={win.startUrl}
+                    className="text-sm font-medium truncate text-primary"
+                    title={win.name}
                   >
-                    {win.startUrl}
+                    {win.name}
                   </span>
                 </div>
-                <span className="font-mono text-xs mt-0.5 truncate text-tertiary">
-                  Session: {win.id}
+                <span
+                  className="font-mono text-xs mt-0.5 truncate text-tertiary"
+                  title={win.startUrl}
+                >
+                  {win.startUrl}
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
