@@ -15,7 +15,13 @@ export function ExtensionsTab() {
       try {
         const settings = await window.browserManager.getSettings();
         if (settings?.extensions) {
-          setExtensions(settings.extensions);
+          // Backfill enabled=true for any extension saved before this feature
+          setExtensions(
+            settings.extensions.map((ext) => ({
+              ...ext,
+              enabled: ext.enabled ?? true,
+            })),
+          );
         }
       } catch (err) {
         console.error("Failed to load extensions:", err);
@@ -33,7 +39,7 @@ export function ExtensionsTab() {
     }
   };
 
-  const handleSave = (data: Omit<Extension, "id">) => {
+  const handleSave = (data: Omit<Extension, "id" | "enabled">) => {
     if (editingExtension) {
       const updatedExtensions = extensions.map((ext) =>
         ext.id === editingExtension.id ? { ...ext, ...data } : ext,
@@ -43,6 +49,7 @@ export function ExtensionsTab() {
       const newExtension: Extension = {
         id: crypto.randomUUID(),
         ...data,
+        enabled: true,
       };
       updateAndSaveExtensions([...extensions, newExtension]);
     }
@@ -51,6 +58,13 @@ export function ExtensionsTab() {
 
   const handleDelete = (id: string) => {
     updateAndSaveExtensions(extensions.filter((ext) => ext.id !== id));
+  };
+
+  const handleToggle = (id: string) => {
+    const updated = extensions.map((ext) =>
+      ext.id === id ? { ...ext, enabled: !ext.enabled } : ext,
+    );
+    updateAndSaveExtensions(updated);
   };
 
   const openAddModal = () => {
@@ -122,6 +136,7 @@ export function ExtensionsTab() {
             extension={ext}
             onDelete={() => handleDelete(ext.id)}
             onEdit={() => openEditModal(ext)}
+            onToggle={() => handleToggle(ext.id)}
           />
         ))}
 

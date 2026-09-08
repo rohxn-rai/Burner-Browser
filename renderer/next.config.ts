@@ -1,12 +1,14 @@
-import { NextConfig } from 'next'
+import { NextConfig } from "next";
+
+const isProd = process.env.NODE_ENV === "production";
 
 const config: NextConfig = {
-  output: 'export',
-  distDir: process.env.NODE_ENV === 'production' ? '../app' : '.next',
+  output: "export",
+  distDir: isProd ? "../app" : ".next",
   trailingSlash: true,
   images: {
     unoptimized: true,
   },
-}
+};
 
-export default config
+export default config;

@@ -38,6 +38,11 @@ contextBridge.exposeInMainWorld("browserManager", {
     ipcRenderer.removeAllListeners("browser-window-closed");
   },
 
+  killAllBrowserWindows: () => ipcRenderer.invoke("kill-all-browser-windows"),
+
+  focusBrowserWindow: (id: string) =>
+    ipcRenderer.invoke("focus-browser-window", id),
+
   getSettings: () => ipcRenderer.invoke("settings-get"),
   saveGeneralSettings: (data: { startUrl: string }) =>
     ipcRenderer.invoke("settings-save-general", data),

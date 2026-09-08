@@ -2,32 +2,43 @@ export interface Extension {
   id: string;
   name: string;
   type: "url" | "folder";
-  value: string; // The web store URL or the local folder path
+  value: string;
+  enabled: boolean;
 }
 
 interface ExtensionCardProps {
   extension: Extension;
   onDelete: () => void;
   onEdit: () => void;
+  onToggle: () => void;
 }
 
 export function ExtensionCard({
   extension,
   onDelete,
   onEdit,
+  onToggle,
 }: ExtensionCardProps) {
   const isUrl = extension.type === "url";
+  const isEnabled = extension.enabled;
 
   return (
-    <div className="group relative p-5 rounded-xl transition-all flex flex-col gap-2 cursor-pointer bg-surface border border-border hover:bg-hover shadow-md">
-      <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
-        {/* Edit Button */}
+    <div
+      className={`group relative p-5 rounded-xl transition-all flex flex-col gap-2 cursor-pointer border shadow-md ${
+        isEnabled
+          ? "bg-surface border-border hover:bg-hover"
+          : "bg-base border-border/50 opacity-60 hover:opacity-80"
+      }`}
+    >
+      {/* Top-right controls: toggle always visible, edit/delete on hover */}
+      <div className="absolute top-3 right-3 flex items-center gap-2">
+        {/* Edit Button — hover only */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onEdit();
           }}
-          className="p-1.5 rounded-md transition-colors bg-overlay text-secondary hover:text-accent cursor-pointer"
+          className="p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 bg-overlay text-secondary hover:text-accent cursor-pointer"
           title="Edit Extension"
         >
           <svg
@@ -40,13 +51,13 @@ export function ExtensionCard({
           </svg>
         </button>
 
-        {/* Delete Button */}
+        {/* Delete Button — hover only */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
           }}
-          className="p-1.5 rounded-md transition-colors bg-overlay text-secondary hover:text-danger cursor-pointer"
+          className="p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100 bg-overlay text-secondary hover:text-danger cursor-pointer"
           title="Delete Extension"
         >
           <svg
@@ -74,9 +85,39 @@ export function ExtensionCard({
         >
           {isUrl ? "Web Store" : "Local Folder"}
         </span>
-        <h3 className="font-semibold pr-16 truncate text-primary">
-          {extension.name}
-        </h3>
+        <div className="flex flex-row justify-between">
+          <h3 className="font-semibold pr-24 truncate text-primary">
+            {extension.name}
+          </h3>
+
+          {/* Slide Toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+            title={isEnabled ? "Disable extension" : "Enable extension"}
+            className="cursor-pointer shrink-0"
+            aria-checked={isEnabled}
+            role="switch"
+          >
+            {/* Track */}
+            <div
+              className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${
+                isEnabled ? "bg-success" : "bg-black border border-border"
+              }`}
+            >
+              {/* Thumb */}
+              <div
+                className={`absolute top-0.5 w-4 h-4 rounded-full shadow transition-all duration-200 ${
+                  isEnabled
+                    ? "translate-x-4.5 bg-white"
+                    : "translate-x-0.5 bg-tertiary"
+                }`}
+              />
+            </div>
+          </button>
+        </div>
       </div>
 
       <p className="text-sm truncate text-secondary" title={extension.value}>

@@ -17,6 +17,7 @@ export interface Extension {
   name: string;
   type: "url" | "folder";
   value: string;
+  enabled: boolean;
 }
 
 export interface AppSettings {
@@ -117,13 +118,15 @@ export function readSettings(): AppSettings {
       const name = ini["extensions"]?.[`${i}.name`];
       const type = ini["extensions"]?.[`${i}.type`] as "url" | "folder";
       const value = ini["extensions"]?.[`${i}.value`];
+      // Default to enabled=true so existing entries without the key stay active
+      const enabled = ini["extensions"]?.[`${i}.enabled`] !== "false";
       if (
         id !== undefined &&
         name !== undefined &&
         type &&
         value !== undefined
       ) {
-        extensions.push({ id, name, type, value });
+        extensions.push({ id, name, type, value, enabled });
       }
     }
 
@@ -162,6 +165,7 @@ export function writeSettings(settings: AppSettings): void {
     extSection[`${i}.name`] = e.name;
     extSection[`${i}.type`] = e.type;
     extSection[`${i}.value`] = e.value;
+    extSection[`${i}.enabled`] = String(e.enabled);
   });
   ini["extensions"] = extSection;
 

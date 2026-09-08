@@ -3,7 +3,7 @@ import { Extension } from "./ExtensionCard";
 
 interface ExtensionModalProps {
   onClose: () => void;
-  onSave: (data: Omit<Extension, "id">) => void;
+  onSave: (data: Omit<Extension, "id" | "enabled">) => void;
   initialData?: Extension | null;
 }
 

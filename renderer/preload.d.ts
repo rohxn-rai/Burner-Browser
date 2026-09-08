@@ -38,6 +38,7 @@ declare global {
           name: string;
           type: "url" | "folder";
           value: string;
+          enabled: boolean;
         }[];
       }) => Promise<{ id: string; pid: number }>;
 
@@ -57,6 +58,15 @@ declare global {
 
       removeWindowClosedListener: () => void;
 
+      killAllBrowserWindows: () => Promise<{
+        success: boolean;
+        error?: string;
+      }>;
+
+      focusBrowserWindow: (
+        id: string,
+      ) => Promise<{ success: boolean; error?: string }>;
+
       getSettings: () => Promise<{
         startUrl: string;
         bookmarks: { id: string; title: string; url: string }[];
@@ -65,6 +75,7 @@ declare global {
           name: string;
           type: "url" | "folder";
           value: string;
+          enabled: boolean;
         }[];
       }>;
 
@@ -82,6 +93,7 @@ declare global {
           name: string;
           type: "url" | "folder";
           value: string;
+          enabled: boolean;
         }[],
       ) => Promise<{ success: boolean; error?: string }>;
     };

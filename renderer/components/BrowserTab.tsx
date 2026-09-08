@@ -92,6 +92,19 @@ export function BrowserTab() {
     setActiveWindows((prev) => prev.filter((w) => w.id !== id));
   };
 
+  const handleKillAll = async () => {
+    try {
+      await window.browserManager.killAllBrowserWindows();
+    } catch {}
+    setActiveWindows([]);
+  };
+
+  const handleFocus = async (id: string) => {
+    try {
+      await window.browserManager.focusBrowserWindow(id);
+    } catch {}
+  };
+
   return (
     <div className="space-y-8">
       <div className="bg-surface p-8 rounded-xl border border-border shadow-lg">
@@ -138,9 +151,18 @@ export function BrowserTab() {
       </div>
 
       <div className="bg-surface p-8 rounded-xl border border-border shadow-lg">
-        <h2 className="mt-0 mb-6 text-2xl font-semibold text-primary">
-          Active Sessions
-        </h2>
+        <div className="flex items-center justify-between mt-0 mb-6">
+          <h2 className="text-2xl font-semibold text-primary">
+            Active Sessions
+          </h2>
+          <button
+            onClick={handleKillAll}
+            disabled={activeWindows.length < 1}
+            className="flex items-center gap-1.5 px-5 py-2 rounded-md text-xs font-medium transition-colors bg-danger text-white hover:bg-danger-hover cursor-pointer"
+          >
+            Kill All Process
+          </button>
+        </div>
 
         {activeWindows.length === 0 ? (
           <p className="italic text-sm text-secondary">No active windows.</p>
@@ -166,12 +188,20 @@ export function BrowserTab() {
                   Session: {win.id}
                 </span>
               </div>
-              <button
-                onClick={() => handleKill(win.id)}
-                className="px-4 py-2 rounded-md text-sm font-medium transition-colors shrink-0 bg-danger text-white hover:bg-danger-hover cursor-pointer"
-              >
-                Kill Process
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => handleFocus(win.id)}
+                  className="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-overlay border border-border text-primary hover:bg-surface cursor-pointer"
+                >
+                  Open
+                </button>
+                <button
+                  onClick={() => handleKill(win.id)}
+                  className="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-danger text-white hover:bg-danger-hover cursor-pointer"
+                >
+                  Kill Process
+                </button>
+              </div>
             </div>
           ))
         )}

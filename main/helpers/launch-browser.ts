@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import https from "https";
-import { spawn, ChildProcess } from "child_process";
+import { spawn, ChildProcess, execSync } from "child_process";
 import { app, ipcMain } from "electron";
 import AdmZip from "adm-zip";
 import {
@@ -25,6 +25,7 @@ interface Extension {
   name: string;
   type: "url" | "folder";
   value: string;
+  enabled?: boolean;
 }
 
 interface LaunchConfig {
@@ -232,6 +233,9 @@ const registerLaunchHandlers = () => {
       const allExtensionPaths: string[] = [];
 
       for (const ext of extensions) {
+        // Skip extensions that have been toggled off
+        if (ext.enabled === false) continue;
+
         if (ext.type === "folder") {
           allExtensionPaths.push(ext.value);
         } else if (ext.type === "url") {
@@ -323,6 +327,58 @@ const registerLaunchHandlers = () => {
     }
 
     return { success: true };
+  });
+
+  // Kill every active browser session at once
+  ipcMain.handle("kill-all-browser-windows", async () => {
+    const errors: string[] = [];
+
+    for (const [id, session] of sessions.entries()) {
+      try {
+        session.process.kill();
+      } catch {}
+
+      sessions.delete(id);
+
+      try {
+        fs.rmSync(session.profileDir, { recursive: true, force: true });
+      } catch (err: any) {
+        errors.push(err.message);
+      }
+    }
+
+    return errors.length === 0
+      ? { success: true }
+      : { success: false, error: errors.join("; ") };
+  });
+
+  // Bring a running browser session's window to the foreground
+  ipcMain.handle("focus-browser-window", async (_event, id: string) => {
+    const session = sessions.get(id);
+    if (!session || !session.pid) {
+      return { success: false, error: "Session not found" };
+    }
+
+    try {
+      const { pid } = session;
+      if (process.platform === "win32") {
+        // PowerShell: use AppActivate via WScript.Shell on the target PID
+        execSync(
+          `powershell -Command "$wsh = New-Object -ComObject WScript.Shell; $wsh.AppActivate(${pid})"`,
+          { windowsHide: true },
+        );
+      } else if (process.platform === "darwin") {
+        execSync(
+          `osascript -e 'tell application "System Events" to set frontmost of (first process whose unix id is ${pid}) to true'`,
+        );
+      } else {
+        // Linux — requires wmctrl to be installed
+        execSync(`wmctrl -p -R ${pid}`);
+      }
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
   });
 };
 
