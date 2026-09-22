@@ -67,6 +67,8 @@ declare global {
         id: string,
       ) => Promise<{ success: boolean; error?: string }>;
 
+      clearProfilesDir: () => Promise<{ success: boolean; error?: string }>;
+
       getSettings: () => Promise<{
         startUrl: string;
         bookmarks: { id: string; title: string; url: string }[];

@@ -3,7 +3,7 @@
   "name": "temporary-browser-manager",
   "productName": "Temporary Browser Manager",
   "description": "Application for creating and managing multiple browser sessions",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "author": "Rohan Rai",
   "type": "module",
   "main": "app/main.js",

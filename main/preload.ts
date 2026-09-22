@@ -43,6 +43,8 @@ contextBridge.exposeInMainWorld("browserManager", {
   focusBrowserWindow: (id: string) =>
     ipcRenderer.invoke("focus-browser-window", id),
 
+  clearProfilesDir: () => ipcRenderer.invoke("clear-profiles-dir"),
+
   getSettings: () => ipcRenderer.invoke("settings-get"),
   saveGeneralSettings: (data: { startUrl: string }) =>
     ipcRenderer.invoke("settings-save-general", data),

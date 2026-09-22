@@ -140,7 +140,8 @@ const Home = () => {
     });
   };
 
-  const handleLaunchApp = () => {
+  const handleLaunchApp = async () => {
+    await window.browserManager.clearProfilesDir();
     router.push("/index");
   };
 

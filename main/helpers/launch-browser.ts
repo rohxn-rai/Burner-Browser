@@ -352,6 +352,25 @@ const registerLaunchHandlers = () => {
       : { success: false, error: errors.join("; ") };
   });
 
+  // Clear the entire profiles directory (kill all sessions first, then wipe)
+  ipcMain.handle("clear-profiles-dir", async () => {
+    // Kill any lingering sessions so their profile dirs aren't file-locked
+    for (const [id, session] of sessions.entries()) {
+      try {
+        session.process.kill();
+      } catch {}
+      sessions.delete(id);
+    }
+
+    try {
+      fs.rmSync(profilesDir, { recursive: true, force: true });
+      fs.mkdirSync(profilesDir, { recursive: true });
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  });
+
   // Bring a running browser session's window to the foreground
   ipcMain.handle("focus-browser-window", async (_event, id: string) => {
     const session = sessions.get(id);
